@@ -1,0 +1,83 @@
+@model Mockstar.Pages.Import.ImportReviewViewModel
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="review-card review-error">
+        <div class="eyebrow">Import error</div>
+        <h2>Could not parse roster</h2>
+        <p>@Model.ErrorMessage</p>
+    </div>
+}
+else if (Model.HasData)
+{
+    <div class="review-card">
+        <div class="eyebrow">Review ready</div>
+        <h2>@Model.EventName</h2>
+        <p class="placeholder-copy">These heats are parsed and normalized, but not yet stored as active judging state.</p>
+
+        @if (Model.RolePrompts.Count > 0)
+        {
+            <section class="prompt-list">
+                <h3>Role assignment required</h3>
+                @foreach (var prompt in Model.RolePrompts)
+                {
+                    <article class="prompt-card">
+                        <h4>@prompt.HeatName</h4>
+                        <p class="placeholder-copy">The parser could not infer leader vs follower sections for these bibs.</p>
+                        <div class="entry-row">
+                            @foreach (var entry in prompt.Entries)
+                            {
+                                <label class="choice-pill" data-heat-id="@prompt.HeatId">
+                                    <span>@entry</span>
+                                    <select>
+                                        <option>Assign role</option>
+                                        <option>Leader</option>
+                                        <option>Follower</option>
+                                    </select>
+                                </label>
+                            }
+                        </div>
+                    </article>
+                }
+            </section>
+        }
+
+        <section class="heat-review-grid">
+            @foreach (var heat in Model.Heats)
+            {
+                <article class="heat-review-card">
+                    <div class="eyebrow">@heat.Kind</div>
+                    <h3>@heat.Name</h3>
+
+                    @if (heat.LeaderEntries.Count > 0)
+                    {
+                        <p><strong>Leaders</strong>: @string.Join(", ", heat.LeaderEntries)</p>
+                    }
+
+                    @if (heat.FollowerEntries.Count > 0)
+                    {
+                        <p><strong>Followers</strong>: @string.Join(", ", heat.FollowerEntries)</p>
+                    }
+
+                    @if (heat.CoupleEntries.Count > 0)
+                    {
+                        <p><strong>Couples</strong>: @string.Join(", ", heat.CoupleEntries)</p>
+                    }
+                </article>
+            }
+        </section>
+
+        <button
+            type="button"
+            class="button button-primary"
+            data-activation-payload="@Model.ActivationPayload"
+            onclick="window.MockstarState.activateImportFromReview(this)">
+            Activate imported heats
+        </button>
+
+        <details class="source-text">
+            <summary>Source text</summary>
+            <pre>@Model.SourceText</pre>
+        </details>
+    </div>
+}

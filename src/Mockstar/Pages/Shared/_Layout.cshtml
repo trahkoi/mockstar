@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Mockstar</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Mockstar.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <a class="brand" asp-area="" asp-page="/Index">
+                <span class="brand-mark">MS</span>
+                <span>
+                    <strong>Mockstar</strong>
+                    <small>Live heat shadow judging</small>
+                </span>
+            </a>
+            <nav class="app-nav" aria-label="Primary">
+                <a asp-area="" asp-page="/Import/Index">Import</a>
+                <a asp-area="" asp-page="/Heats/Index">Heats</a>
+                <a asp-area="" asp-page="/Scoring/Index">Scoring</a>
+            </nav>
+        </header>
+
+        <main role="main" class="app-main">
+            <div id="storage-warning" class="storage-warning is-hidden">
+                Local storage is unavailable. Mockstar is using in-memory state and your scoring data will be lost on refresh.
+            </div>
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/vendor/htmx/htmx.min.js"></script>
+    <script src="~/vendor/hyperscript/_hyperscript.min.js"></script>
+    <script src="~/vendor/tesseract/tesseract.min.js"></script>
+    <script src="~/js/mockstar-state.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

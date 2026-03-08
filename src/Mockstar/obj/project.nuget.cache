@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "8P+n9jIk28U=",
+  "success": true,
+  "projectFilePath": "/Users/tero.rahko/code/personal/wcs/mockstar/src/Mockstar/Mockstar.csproj",
+  "expectedPackageFiles": [
+    "/Users/tero.rahko/.nuget/packages/anglesharp/1.4.0/anglesharp.1.4.0.nupkg.sha512"
+  ],
+  "logs": []
+}

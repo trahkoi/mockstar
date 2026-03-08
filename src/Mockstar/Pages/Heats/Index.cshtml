@@ -1,0 +1,43 @@
+@page
+@model Mockstar.Pages.Heats.IndexModel
+@{
+    ViewData["Title"] = "Heats";
+}
+
+<form id="heats-antiforgery" class="is-hidden">
+    @Html.AntiForgeryToken()
+</form>
+
+<section class="placeholder-panel">
+    <div class="eyebrow">Heat selection</div>
+    <h1>Imported heats</h1>
+    <p class="page-copy">
+        Imported events live in browser state. Selecting a heat posts the current state back to Razor Pages and swaps in a review fragment through HTMX.
+    </p>
+    <div class="placeholder-layout import-layout">
+        <article class="placeholder-card">
+            <h2>Event list</h2>
+            <div id="heats-list" class="stack">
+                <p class="placeholder-copy">No client-side judging data loaded yet.</p>
+            </div>
+        </article>
+        <article class="placeholder-card">
+            <h2>Heat detail</h2>
+            <div id="heat-detail">
+                <p class="placeholder-copy">Choose a heat to inspect its entries and open scoring.</p>
+            </div>
+        </article>
+        <article class="placeholder-card">
+            <h2>Workflow</h2>
+            <ul class="meta-list">
+                <li>Import roster data</li>
+                <li>Select the active heat here</li>
+                <li>Score it on the dedicated scoring page</li>
+            </ul>
+        </article>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/heats.js" asp-append-version="true"></script>
+}

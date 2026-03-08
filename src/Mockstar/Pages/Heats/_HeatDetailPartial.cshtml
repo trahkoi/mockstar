@@ -1,0 +1,30 @@
+@model Mockstar.Pages.Heats.HeatDetailViewModel
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="placeholder-copy">@Model.Message</p>
+}
+else
+{
+    <div class="review-card">
+        <div class="eyebrow">@Model.Type</div>
+        <h3>@Model.Name</h3>
+
+        @if (Model.LeaderEntries.Count > 0)
+        {
+            <p><strong>Leaders</strong>: @string.Join(", ", Model.LeaderEntries)</p>
+        }
+
+        @if (Model.FollowerEntries.Count > 0)
+        {
+            <p><strong>Followers</strong>: @string.Join(", ", Model.FollowerEntries)</p>
+        }
+
+        @if (Model.CoupleEntries.Count > 0)
+        {
+            <p><strong>Couples</strong>: @string.Join(", ", Model.CoupleEntries)</p>
+        }
+
+        <a class="button button-primary" asp-page="/Scoring/Index">Open Scoring</a>
+    </div>
+}

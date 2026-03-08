@@ -1,0 +1,32 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero">
+    <div class="eyebrow">Mobile-first ASP.NET Core + HTMX</div>
+    <h1>Score live heats without paper, lag, or tab-room ceremony.</h1>
+    <p class="lede">
+        Import rosters from OCR or the web, review parsed heats, and shadow judge directly from a phone.
+    </p>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-page="/Import/Index">Start Import</a>
+        <a class="button button-secondary" asp-page="/Scoring/Index">Open Scoring</a>
+    </div>
+</section>
+
+<section class="panel-grid">
+    <article class="panel">
+        <h2>Import</h2>
+        <p>Image OCR in the browser with bundled Tesseract.js, or scrape roster text server-side with AngleSharp.</p>
+    </article>
+    <article class="panel">
+        <h2>Heats</h2>
+        <p>Feature-organized pages keep imported events, heat selection, and scoring views separate and HTMX-friendly.</p>
+    </article>
+    <article class="panel">
+        <h2>Scoring</h2>
+        <p>Rank and tie behavior will stay client-side so slider interaction remains immediate during live judging.</p>
+    </article>
+</section>

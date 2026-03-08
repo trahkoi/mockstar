@@ -1,33 +1,24 @@
 @page
+@model Mockstar.Web.Pages.Scoring.IndexModel
 @{
     ViewData["Title"] = "Scoring";
 }
+
+<form id="scoring-antiforgery" class="is-hidden">
+    @Html.AntiForgeryToken()
+</form>
 
 <section class="placeholder-panel">
     <div class="eyebrow">Live scoring</div>
     <h1>Heat scoring</h1>
     <p class="page-copy">
-        Scores, ranking, ties, role switching, and final-heat pairing all run client-side so judging stays immediate.
+        Razor owns the scoring markup. Client-side state keeps judging immediate, and HTMX reloads the server-rendered
+        shell when the active role or structural controls change.
     </p>
-    <div class="stack">
-        <div id="scoring-header" class="placeholder-card">
+    <div id="scoring-shell" class="stack">
+        <div class="placeholder-card">
             <p class="placeholder-copy">No active heat selected yet.</p>
         </div>
-
-        <div id="role-switcher" class="placeholder-chip-row"></div>
-
-        <div id="pairing-panel"></div>
-
-        <div id="scoreboard" class="scoreboard"></div>
-
-        <button
-            id="finalize-button"
-            type="button"
-            class="button button-primary"
-            _="on scorestate if event.detail.hasTies add @@disabled to me else remove @@disabled from me end"
-            disabled>
-            Finalize score sheet
-        </button>
     </div>
 </section>
 

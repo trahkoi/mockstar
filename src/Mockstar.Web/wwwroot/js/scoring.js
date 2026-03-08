@@ -1,11 +1,8 @@
 (function () {
-  const header = document.getElementById("scoring-header");
-  const roleSwitcher = document.getElementById("role-switcher");
-  const pairingPanel = document.getElementById("pairing-panel");
-  const scoreboard = document.getElementById("scoreboard");
-  const finalizeButton = document.getElementById("finalize-button");
+  const shell = document.getElementById("scoring-shell");
+  const antiForgeryToken = document.querySelector("#scoring-antiforgery input[name='__RequestVerificationToken']")?.value;
 
-  if (!header || !roleSwitcher || !pairingPanel || !scoreboard || !finalizeButton || !window.MockstarState) {
+  if (!shell || !window.MockstarState) {
     return;
   }
 
@@ -41,114 +38,20 @@
     return ["couple"];
   }
 
-  function renderRoleSwitcher(heat) {
-    roleSwitcher.innerHTML = availableRoles(heat).map((role) => `
-      <button type="button" class="placeholder-chip ${role === activeRole ? "active-chip" : ""}" data-role="${role}">
-        ${role}
-      </button>
-    `).join("");
-
-    roleSwitcher.querySelectorAll("[data-role]").forEach((button) => {
-      button.addEventListener("click", function () {
-        activeRole = this.dataset.role;
-        render();
-      });
-    });
-  }
-
-  function renderPairingPanel(heat) {
-    if (heat.type !== "jack-and-jill-final" || !heat.followerEntries.length) {
-      pairingPanel.innerHTML = "";
-      return;
-    }
-
-    pairingPanel.innerHTML = `
-      <article class="placeholder-card">
-        <h2>Pair finals</h2>
-        <div class="placeholder-layout pairing-grid">
-          <label class="field">
-            <span>Leader bib</span>
-            <select id="pair-leader">
-              ${heat.leaderEntries.map((entry) => `<option value="${entry.bib}">${entry.display}</option>`).join("")}
-            </select>
-          </label>
-          <label class="field">
-            <span>Follower bib</span>
-            <select id="pair-follower">
-              ${heat.followerEntries.map((entry) => `<option value="${entry.bib}">${entry.display}</option>`).join("")}
-            </select>
-          </label>
-          <button id="pair-submit" type="button" class="button button-secondary">Link pair</button>
-        </div>
-      </article>
-    `;
-
-    document.getElementById("pair-submit").addEventListener("click", function () {
-      const leaderBib = Number(document.getElementById("pair-leader").value);
-      const followerBib = Number(document.getElementById("pair-follower").value);
-      window.MockstarState.pairFinalHeat(heat.id, leaderBib, followerBib);
-      render();
-    });
-  }
-
-  function renderHeader(heat, sheet) {
-    header.innerHTML = `
-      <div class="eyebrow">${heat.type.replaceAll("-", " ")}</div>
-      <h2>${heat.name}</h2>
-      <p class="placeholder-copy">Scoring role: ${sheet.role}. Status: ${sheet.status}${sheet.finalizedAt ? ` at ${sheet.finalizedAt}` : ""}</p>
-    `;
-  }
-
-  function renderRows(heat, sheet) {
-    const entries = window.MockstarState.getEntriesForRole(heat, sheet.role);
-    const ranked = window.MockstarState.rankEntries(heat, entries, sheet.scores);
-    const ranking = new Map(ranked.map((entry, index) => [entry.id, index + 1]));
-
-    scoreboard.innerHTML = entries.map((entry) => `
-      <article
-        class="score-row"
-        data-entry-id="${entry.id}"
-        _="on scorestate if event.detail.tiedIds.includes(my @data-entry-id) add .is-tied else remove .is-tied end">
-        <div>
-          <strong>${window.MockstarState.entryDisplay(heat, entry)}</strong>
-          <div class="placeholder-copy">Rank <span class="rank-value">${ranking.get(entry.id)}</span></div>
-        </div>
-        <label class="score-input">
-          <input
-            class="score-slider"
-            type="range"
-            min="0"
-            max="1000"
-            value="${sheet.scores[entry.id] ?? 500}"
-            data-entry-id="${entry.id}"
-            ${sheet.status === "finalized" ? "disabled" : ""}
-            _="on input call window.MockstarScoring.onSliderInput(me)">
-          <span class="score-value">${sheet.scores[entry.id] ?? 500}</span>
-        </label>
-      </article>
-    `).join("");
-
-    window.MockstarScoring.refresh();
-  }
-
-  function renderEmpty() {
-    header.innerHTML = '<p class="placeholder-copy">Import a roster and pick a heat before scoring.</p>';
-    roleSwitcher.innerHTML = "";
-    pairingPanel.innerHTML = "";
-    scoreboard.innerHTML = "";
+  function requestConfig(state) {
+    return {
+      target: "#scoring-shell",
+      swap: "innerHTML",
+      headers: antiForgeryToken ? { RequestVerificationToken: antiForgeryToken } : {},
+      values: {
+        stateJson: JSON.stringify(state),
+        activeRole
+      }
+    };
   }
 
   function render() {
-    const { heat, sheet } = getActiveContext();
-    if (!heat || !sheet) {
-      renderEmpty();
-      return;
-    }
-
-    renderHeader(heat, sheet);
-    renderRoleSwitcher(heat);
-    renderPairingPanel(heat);
-    renderRows(heat, sheet);
+    htmx.ajax("POST", "/Scoring?handler=Shell", requestConfig(window.MockstarState.loadState()));
   }
 
   window.MockstarScoring = {
@@ -173,7 +76,7 @@
       const entries = window.MockstarState.getEntriesForRole(heat, sheet.role);
       const ranked = window.MockstarState.rankEntries(heat, entries, sheet.scores);
       ranked.forEach((entry, index) => {
-        const row = scoreboard.querySelector(`[data-entry-id="${entry.id}"]`);
+        const row = shell.querySelector(`[data-entry-id="${entry.id}"]`);
         if (row) {
           row.querySelector(".rank-value").textContent = String(index + 1);
           row.querySelector(".score-value").textContent = String(sheet.scores[entry.id] ?? 500);
@@ -181,17 +84,47 @@
       });
 
       const tiedIds = window.MockstarState.getTiedEntryIds(sheet.scores);
-      document.body.dispatchEvent(new CustomEvent("scorestate", {
-        bubbles: true,
-        detail: { tiedIds, hasTies: tiedIds.length > 0 }
-      }));
+      entries.forEach((entry) => {
+        const row = shell.querySelector(`[data-entry-id="${entry.id}"]`);
+        if (row) {
+          row.classList.toggle("is-tied", tiedIds.includes(entry.id));
+        }
+      });
+
+      const finalizeButton = shell.querySelector("[data-finalize]");
+      if (finalizeButton) {
+        finalizeButton.disabled = tiedIds.length > 0 || sheet.status === "finalized";
+      }
     },
     isTied(row, tiedIds) {
       return tiedIds.includes(row.dataset.entryId);
     }
   };
 
-  finalizeButton.addEventListener("click", function () {
+  shell.addEventListener("click", function (event) {
+    const roleButton = event.target.closest("[data-role]");
+    if (roleButton?.dataset.role) {
+      activeRole = roleButton.dataset.role;
+      render();
+      return;
+    }
+
+    const pairButton = event.target.closest("[data-pair-submit]");
+    if (pairButton?.dataset.heatId) {
+      const leaderBib = Number(shell.querySelector("[data-pair-leader]")?.value);
+      const followerBib = Number(shell.querySelector("[data-pair-follower]")?.value);
+      if (!Number.isNaN(leaderBib) && !Number.isNaN(followerBib)) {
+        window.MockstarState.pairFinalHeat(pairButton.dataset.heatId, leaderBib, followerBib);
+        render();
+      }
+      return;
+    }
+
+    const finalizeButton = event.target.closest("[data-finalize]");
+    if (!finalizeButton) {
+      return;
+    }
+
     const state = window.MockstarState.loadState();
     const heat = window.MockstarState.getHeatById(state, state.selectedHeatId);
     if (!heat) {
@@ -204,6 +137,26 @@
     } catch (error) {
       alert(error instanceof Error ? error.message : "Unable to finalize score sheet.");
     }
+  });
+
+  shell.addEventListener("input", function (event) {
+    const input = event.target.closest(".score-slider");
+    if (input) {
+      window.MockstarScoring.onSliderInput(input);
+    }
+  });
+
+  document.body.addEventListener("htmx:afterSwap", function (event) {
+    if (event.target.id !== "scoring-shell") {
+      return;
+    }
+
+    const nextRole = shell.querySelector("[data-active-role]")?.dataset.activeRole;
+    if (nextRole) {
+      activeRole = nextRole;
+    }
+
+    window.MockstarScoring.refresh();
   });
 
   document.addEventListener("DOMContentLoaded", render);

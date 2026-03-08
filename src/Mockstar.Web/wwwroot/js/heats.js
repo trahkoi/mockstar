@@ -6,51 +6,34 @@
     return;
   }
 
-  function requestConfig(heatId, stateJson) {
+  function requestConfig(target, values) {
     return {
-      target: "#heat-detail",
+      target,
       swap: "innerHTML",
       headers: antiForgeryToken ? { RequestVerificationToken: antiForgeryToken } : {},
-      values: {
-        heatId,
-        stateJson
-      }
+      values
     };
   }
 
-  function render() {
+  function refresh() {
     const state = window.MockstarState.loadState();
-    if (!state.eventRecords.length) {
-      list.innerHTML = '<p class="placeholder-copy">Import a roster first to populate heat selection.</p>';
+    const stateJson = JSON.stringify(state);
+    htmx.ajax("POST", "/Heats?handler=List", requestConfig("#heats-list", { stateJson }));
+    htmx.ajax("POST", "/Heats?handler=Detail", requestConfig("#heat-detail", {
+      heatId: state.selectedHeatId ?? "",
+      stateJson
+    }));
+  }
+
+  list.addEventListener("click", function (event) {
+    const button = event.target.closest(".heat-picker");
+    if (!button?.dataset.heatId) {
       return;
     }
 
-    list.innerHTML = state.eventRecords.map((eventRecord) => `
-      <section class="stack">
-        <h3>${eventRecord.name}</h3>
-        ${eventRecord.heats.map((heat) => `
-          <button
-            type="button"
-            class="button ${state.selectedHeatId === heat.id ? "button-primary" : "button-secondary"} heat-picker"
-            data-heat-id="${heat.id}">
-            ${heat.name}
-          </button>
-        `).join("")}
-      </section>
-    `).join("");
+    window.MockstarState.selectHeat(button.dataset.heatId);
+    refresh();
+  });
 
-    list.querySelectorAll(".heat-picker").forEach((button) => {
-      button.addEventListener("click", function () {
-        const nextState = window.MockstarState.selectHeat(this.dataset.heatId);
-        htmx.ajax("POST", "/Heats?handler=Detail", requestConfig(this.dataset.heatId, JSON.stringify(nextState)));
-        render();
-      });
-    });
-
-    if (state.selectedHeatId) {
-      htmx.ajax("POST", "/Heats?handler=Detail", requestConfig(state.selectedHeatId, JSON.stringify(state)));
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", render);
+  document.addEventListener("DOMContentLoaded", refresh);
 })();

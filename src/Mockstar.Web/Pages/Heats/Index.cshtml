@@ -12,8 +12,8 @@
     <div class="eyebrow">Heat selection</div>
     <h1>Imported heats</h1>
     <p class="page-copy">
-        Imported events live in browser state. Selecting a heat posts the current state back to Razor Pages and swaps in
-        a review fragment through HTMX.
+        Imported events live in browser state. Razor partials own the list and detail markup, while HTMX swaps in the
+        server-rendered fragments after the browser sends the current state.
     </p>
     <div class="placeholder-layout import-layout">
         <article class="placeholder-card">

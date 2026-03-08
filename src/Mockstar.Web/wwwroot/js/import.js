@@ -1,5 +1,6 @@
 (function () {
   const submitButton = document.getElementById("ocr-submit");
+  const antiForgeryToken = document.querySelector("#ocr-form input[name='__RequestVerificationToken']")?.value;
   if (!submitButton) {
     return;
   }
@@ -27,13 +28,15 @@
       textField.value = result.data.text || "";
       status.textContent = "OCR complete. Sending extracted text for review...";
 
-      const response = await fetch("/Import?handler=Text", {
-        method: "POST",
-        body: new FormData(form),
-        headers: { "HX-Request": "true" }
+      await htmx.ajax("POST", "/Import?handler=Text", {
+        source: form,
+        target: "#import-result",
+        swap: "innerHTML",
+        headers: antiForgeryToken ? { RequestVerificationToken: antiForgeryToken } : {},
+        values: {
+          extractedText: textField.value
+        }
       });
-
-      document.getElementById("import-result").innerHTML = await response.text();
       status.textContent = "Review updated.";
     } catch (error) {
       status.textContent = error instanceof Error ? error.message : "OCR failed.";

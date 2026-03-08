@@ -1,7 +1,8 @@
-using Mockstar.Domain;
+using Mockstar.ParserApi.Domain;
+using Mockstar.ParserApi.Services.Rosters;
 using Mockstar.Services.Rosters;
 
-namespace Mockstar.Tests;
+namespace Mockstar.ParserApi.Tests;
 
 public sealed class RosterParserTests
 {

@@ -2,10 +2,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<Mockstar.Services.Rosters.RosterParser>();
-builder.Services.AddScoped<Mockstar.Services.Rosters.RosterNormalizer>();
-builder.Services.AddScoped<Mockstar.Services.WebScraper>();
+builder.Services.Configure<Mockstar.Services.Imports.ParserApiOptions>(
+    builder.Configuration.GetSection(Mockstar.Services.Imports.ParserApiOptions.SectionName));
+builder.Services.AddHttpClient<Mockstar.Services.Imports.ParserApiClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider
+        .GetRequiredService<Microsoft.Extensions.Options.IOptions<Mockstar.Services.Imports.ParserApiOptions>>()
+        .Value;
+    client.BaseAddress = new Uri(options.BaseUrl, UriKind.Absolute);
+    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+});
 
 var app = builder.Build();
 

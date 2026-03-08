@@ -1,8 +1,8 @@
-using System.Globalization;
 using System.Text;
-using Mockstar.Domain;
+using Mockstar.ParserApi.Domain;
+using Mockstar.Services.Rosters;
 
-namespace Mockstar.Services.Rosters;
+namespace Mockstar.ParserApi.Services.Rosters;
 
 public sealed class RosterNormalizer
 {

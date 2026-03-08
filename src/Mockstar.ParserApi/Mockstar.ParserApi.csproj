@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mockstar.ParserApi\Mockstar.ParserApi.csproj" />
+    <PackageReference Include="AngleSharp" Version="1.4.0" />
   </ItemGroup>
 
 </Project>

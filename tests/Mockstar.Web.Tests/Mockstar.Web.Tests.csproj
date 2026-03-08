@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mockstar\Mockstar.csproj" />
+    <ProjectReference Include="..\..\src\Mockstar.Web\Mockstar.Web.csproj" />
   </ItemGroup>
 
 </Project>

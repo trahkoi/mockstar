@@ -2,11 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using Mockstar.Pages.Import;
 using Mockstar.ParserApi.Contracts;
 using Mockstar.Services.Imports;
+using Mockstar.Web.Pages.Import;
 
-namespace Mockstar.Tests;
+namespace Mockstar.Web.Tests;
 
 public sealed class ParserApiClientTests
 {

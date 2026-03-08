@@ -1,4 +1,4 @@
-namespace Mockstar.Services.Imports;
+namespace Mockstar.Web.Services.Imports;
 
 public sealed class ParserApiOptions
 {

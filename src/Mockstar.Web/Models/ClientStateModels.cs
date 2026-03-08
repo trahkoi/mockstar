@@ -1,4 +1,4 @@
-namespace Mockstar.Models;
+namespace Mockstar.Web.Models;
 
 public sealed record ClientJudgingState(
     IReadOnlyList<ClientEventRecord> EventRecords,

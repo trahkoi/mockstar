@@ -3,9 +3,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Mockstar.ParserApi.Contracts;
-using Mockstar.Services.Imports;
+using Mockstar.Web.Services.Imports;
 
-namespace Mockstar.Pages.Import;
+namespace Mockstar.Web.Pages.Import;
 
 public sealed class IndexModel : PageModel
 {

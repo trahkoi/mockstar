@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Mockstar.ParserApi.Contracts;
 
-namespace Mockstar.Services.Imports;
+namespace Mockstar.Web.Services.Imports;
 
 public sealed class ParserApiClient
 {

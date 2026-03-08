@@ -1,11 +1,11 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Mockstar/Mockstar.csproj" />
+    <Project Path="src/Mockstar.Web/Mockstar.Web.csproj" />
     <Project Path="src/Mockstar.ParserApi/Mockstar.ParserApi.csproj" />
     <Project Path="src/Mockstar.Scoring/Mockstar.Scoring.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Mockstar.ParserApi.Tests/Mockstar.ParserApi.Tests.csproj" />
-    <Project Path="tests/Mockstar.Tests/Mockstar.Tests.csproj" />
+    <Project Path="tests/Mockstar.Web.Tests/Mockstar.Web.Tests.csproj" />
   </Folder>
 </Solution>

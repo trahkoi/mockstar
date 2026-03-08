@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Mockstar.Models;
+using Mockstar.Web.Models;
 
-namespace Mockstar.Pages.Heats;
+namespace Mockstar.Web.Pages.Heats;
 
 public sealed class IndexModel : PageModel
 {

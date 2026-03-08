@@ -1,6 +1,6 @@
 using System.Text;
 using Mockstar.Scoring;
-using Mockstar.Services.Rosters;
+using Mockstar.ParserApi.Services.Rosters;
 
 namespace Mockstar.ParserApi.Services.Rosters;
 

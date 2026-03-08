@@ -1,6 +1,6 @@
 using AngleSharp.Html.Parser;
 
-namespace Mockstar.Services;
+namespace Mockstar.ParserApi.Services;
 
 public sealed class WebScraper
 {

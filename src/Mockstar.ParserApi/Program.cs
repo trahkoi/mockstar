@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 using Mockstar.ParserApi.Services.Rosters;
-using Mockstar.Services;
-using Mockstar.Services.Rosters;
+using Mockstar.ParserApi.Services;
 
 namespace Mockstar.ParserApi;
 

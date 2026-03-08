@@ -1,7 +1,7 @@
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 using Mockstar.Scoring;
 
-namespace Mockstar.Services.Rosters;
+namespace Mockstar.ParserApi.Services.Rosters;
 
 internal static class ParserImportResponseFactory
 {

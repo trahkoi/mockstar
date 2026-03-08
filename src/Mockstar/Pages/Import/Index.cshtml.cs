@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 using Mockstar.Services.Imports;
 
 namespace Mockstar.Pages.Import;

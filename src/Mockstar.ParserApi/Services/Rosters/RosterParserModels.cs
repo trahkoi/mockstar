@@ -1,6 +1,6 @@
 using Mockstar.Scoring;
 
-namespace Mockstar.Services.Rosters;
+namespace Mockstar.ParserApi.Services.Rosters;
 
 public sealed record ParsedCouple(int LeaderBib, int FollowerBib);
 

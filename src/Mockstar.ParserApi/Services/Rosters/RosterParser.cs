@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Mockstar.Scoring;
 
-namespace Mockstar.Services.Rosters;
+namespace Mockstar.ParserApi.Services.Rosters;
 
 public sealed partial class RosterParser
 {

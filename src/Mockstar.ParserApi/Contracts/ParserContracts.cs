@@ -1,4 +1,4 @@
-namespace Mockstar.Parser.Contracts;
+namespace Mockstar.ParserApi.Contracts;
 
 public sealed record ParseRosterTextRequest(string Text);
 

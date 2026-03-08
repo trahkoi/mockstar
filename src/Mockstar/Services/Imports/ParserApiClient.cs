@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 
 namespace Mockstar.Services.Imports;
 

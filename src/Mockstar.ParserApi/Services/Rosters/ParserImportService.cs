@@ -1,9 +1,9 @@
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 using Mockstar.Scoring;
 using Mockstar.ParserApi.Services.Rosters;
-using Mockstar.Services;
+using Mockstar.ParserApi.Services;
 
-namespace Mockstar.Services.Rosters;
+namespace Mockstar.ParserApi.Services.Rosters;
 
 public sealed class ParserImportService
 {

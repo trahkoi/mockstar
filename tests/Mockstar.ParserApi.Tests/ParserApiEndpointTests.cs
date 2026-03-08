@@ -3,9 +3,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 
-namespace Mockstar.Tests;
+namespace Mockstar.ParserApi.Tests;
 
 public sealed class ParserApiEndpointTests
 {

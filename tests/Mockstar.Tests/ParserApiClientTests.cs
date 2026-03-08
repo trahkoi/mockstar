@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Mockstar.Pages.Import;
-using Mockstar.Parser.Contracts;
+using Mockstar.ParserApi.Contracts;
 using Mockstar.Services.Imports;
 
 namespace Mockstar.Tests;

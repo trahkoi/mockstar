@@ -1,5 +1,5 @@
 using Mockstar.Parser.Contracts;
-using Mockstar.ParserApi.Domain;
+using Mockstar.Scoring;
 using Mockstar.ParserApi.Services.Rosters;
 using Mockstar.Services;
 

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Mockstar.ParserApi.Domain;
+namespace Mockstar.Scoring;
 
 public enum DivisionKind
 {
@@ -24,12 +24,12 @@ public enum ImportSourceKind
 
 public sealed record BibEntry(string Id, int Bib)
 {
-    internal string Display => Bib.ToString(CultureInfo.InvariantCulture);
+    public string Display => Bib.ToString(CultureInfo.InvariantCulture);
 }
 
-internal sealed record CoupleEntry(string Id, int LeaderBib, int? FollowerBib)
+public sealed record CoupleEntry(string Id, int LeaderBib, int? FollowerBib)
 {
-    internal string Display =>
+    public string Display =>
         FollowerBib is int followerBib
             ? $"{LeaderBib.ToString(CultureInfo.InvariantCulture)}/{followerBib.ToString(CultureInfo.InvariantCulture)}"
             : LeaderBib.ToString(CultureInfo.InvariantCulture);
@@ -46,7 +46,7 @@ public abstract record Heat(
     DivisionKind DivisionKind,
     ImportSource ImportSource);
 
-internal sealed record JackAndJillPrelimHeat(
+public sealed record JackAndJillPrelimHeat(
     string Id,
     string Name,
     RoundPhase Phase,
@@ -64,7 +64,7 @@ public sealed record JackAndJillFinalHeat(
     ImportSource ImportSource)
     : Heat(Id, Name, RoundPhase.Final, DivisionKind.JackAndJill, ImportSource);
 
-internal sealed record StrictlyHeat(
+public sealed record StrictlyHeat(
     string Id,
     string Name,
     RoundPhase Phase,

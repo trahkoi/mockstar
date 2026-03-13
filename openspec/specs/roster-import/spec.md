@@ -63,6 +63,25 @@ The Mockstar import workflow SHALL obtain parsed and normalized roster data by c
 - **WHEN** a user submits a roster URL on the import page
 - **THEN** Mockstar sends that URL to the parser API and renders the returned review data using the existing import review experience
 
+### Requirement: Import activation persists heats to database
+The system SHALL save the parsed and role-assigned EventRecord to the database when the user activates an import, instead of saving to browser localStorage.
+
+#### Scenario: Activate import saves to database
+- **WHEN** a user clicks "Activate" after reviewing and assigning roles
+- **THEN** the system calls POST /api/heats/{eventId} to persist the EventRecord to SQLite
+
+#### Scenario: Activate import redirects to heats list
+- **WHEN** the import is successfully saved to database
+- **THEN** the user is redirected to the Heats page showing the newly imported event
+
+#### Scenario: Activate import handles save failure
+- **WHEN** the database save fails
+- **THEN** the system displays an error message and does not redirect
+
+### ~~Requirement: Import activation saves to browser localStorage~~ (REMOVED)
+> **Removed by:** use-persisted-heats
+> **Reason:** Replaced by server-side persistence. Data saved to localStorage will not be migrated; users must re-import.
+
 ### Requirement: Import review preserves parser-driven validation feedback
 The Mockstar import workflow SHALL surface parser API validation and parsing failures to the user without replacing them with generic transport errors when the parser service returns a handled failure.
 

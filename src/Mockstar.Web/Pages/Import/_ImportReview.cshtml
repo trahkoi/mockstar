@@ -25,10 +25,10 @@ else if (Model.HasData)
                         <h4>@prompt.HeatName</h4>
                         <p class="placeholder-copy">The parser could not infer leader vs follower sections for these bibs.</p>
                         <div class="entry-row">
-                            @foreach (var entry in prompt.Entries)
+                            @for (var i = 0; i < prompt.Entries.Count; i++)
                             {
-                                <label class="choice-pill" data-heat-id="@prompt.HeatId">
-                                    <span>@entry</span>
+                                <label class="choice-pill" data-heat-id="@prompt.HeatId" data-entry-index="@i">
+                                    <span>@prompt.Entries[i]</span>
                                     <select>
                                         <option>Assign role</option>
                                         <option>Leader</option>
@@ -67,10 +67,27 @@ else if (Model.HasData)
             }
         </section>
 
-        <button     type="button"        class="button button-primary"   data-activation-payload="@Model.ActivationPayload"
-                    onclick="window.MockstarState.activateImportFromReview(this)">
-            Activate imported heats
-        </button>
+        <form method="post" asp-page="/Import/Index" asp-page-handler="Activate" id="activation-form">
+            <input type="hidden" name="activationPayload" value="@Model.ActivationPayload" />
+            <input type="hidden" name="roleAssignmentsJson" id="role-assignments-json" value="" />
+            <button type="submit" class="button button-primary" onclick="collectRoleAssignments()">
+                Activate imported heats
+            </button>
+        </form>
+        <script>
+            function collectRoleAssignments() {
+                var assignments = {};
+                document.querySelectorAll('.choice-pill[data-heat-id]').forEach(function (pill) {
+                    var heatId = pill.dataset.heatId;
+                    var index = pill.dataset.entryIndex;
+                    var select = pill.querySelector('select');
+                    if (!select || select.value === 'Assign role') return;
+                    if (!assignments[heatId]) assignments[heatId] = {};
+                    assignments[heatId][index] = select.value;
+                });
+                document.getElementById('role-assignments-json').value = JSON.stringify(assignments);
+            }
+        </script>
 
         <details class="source-text">
             <summary>Source text</summary>

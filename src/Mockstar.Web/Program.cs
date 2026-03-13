@@ -1,4 +1,5 @@
 using Mockstar.Web.Services.Imports;
+using Mockstar.Web.Services.Heats;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,14 @@ builder.Services.AddRazorPages();
 builder.Services.Configure<ParserApiOptions>(
     builder.Configuration.GetSection(ParserApiOptions.SectionName));
 builder.Services.AddHttpClient<ParserApiClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider
+        .GetRequiredService<Microsoft.Extensions.Options.IOptions<ParserApiOptions>>()
+        .Value;
+    client.BaseAddress = new Uri(options.BaseUrl, UriKind.Absolute);
+    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+});
+builder.Services.AddHttpClient<HeatApiClient>((serviceProvider, client) =>
 {
     var options = serviceProvider
         .GetRequiredService<Microsoft.Extensions.Options.IOptions<ParserApiOptions>>()

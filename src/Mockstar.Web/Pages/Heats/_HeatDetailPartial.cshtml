@@ -25,6 +25,6 @@ else
             <p><strong>Couples</strong>: @string.Join(", ", Model.CoupleEntries)</p>
         }
 
-        <a class="button button-primary" asp-page="/Scoring/Index">Open Scoring</a>
+        <a class="button button-primary" asp-page="/Scoring/Heat" asp-route-heatId="@Model.HeatId">Open Scoring</a>
     </div>
 }

@@ -4,22 +4,41 @@
     ViewData["Title"] = "Heats";
 }
 
-<form id="heats-antiforgery" class="is-hidden">
-    @Html.AntiForgeryToken()
-</form>
-
 <section class="placeholder-panel">
     <div class="eyebrow">Heat selection</div>
     <h1>Imported heats</h1>
     <p class="page-copy">
-        Imported events live in browser state. Razor partials own the list and detail markup, while HTMX swaps in the
-        server-rendered fragments after the browser sends the current state.
+        Imported events are loaded from the database. Select a heat to view its entries and open scoring.
     </p>
     <div class="placeholder-layout import-layout">
         <article class="placeholder-card">
             <h2>Event list</h2>
             <div id="heats-list" class="stack">
-                <p class="placeholder-copy">No client-side judging data loaded yet.</p>
+                @if (!Model.ViewModel.HasEvents)
+                {
+                    <p class="placeholder-copy">No events imported yet. <a asp-page="/Import/Index">Import a roster</a> to get started.</p>
+                }
+                else
+                {
+                    @foreach (var eventSection in Model.ViewModel.EventSections)
+                    {
+                        <div class="stack">
+                            <h3>@eventSection.EventName</h3>
+                            @foreach (var heat in eventSection.Heats)
+                            {
+                                <button
+                                    type="button"
+                                    class="button button-secondary heat-picker"
+                                    data-heat-id="@heat.Id"
+                                    hx-get="@Url.Page("/Heats/Index", "Detail", new { heatId = heat.Id })"
+                                    hx-target="#heat-detail"
+                                    hx-swap="innerHTML">
+                                    @heat.Name
+                                </button>
+                            }
+                        </div>
+                    }
+                }
             </div>
         </article>
         <article class="placeholder-card">
@@ -38,7 +57,3 @@
         </article>
     </div>
 </section>
-
-@section Scripts {
-    <script src="~/js/heats.js" asp-append-version="true"></script>
-}

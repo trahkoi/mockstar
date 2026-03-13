@@ -1,0 +1,20 @@
+@model Mockstar.Web.Pages.Scoring.ScoringViewModel
+
+<div class="scoring-entries" data-role="@Model.ActiveRole">
+    @foreach (var entry in Model.Entries)
+    {
+        <div class="scoring-entry" data-entry-id="@entry.EntryId">
+            <span class="rank">@entry.Rank</span>
+            <span class="bib">@entry.Display</span>
+            <div class="slider-container">
+                <input type="range" 
+                       class="score-slider"
+                       min="0" 
+                       max="1000" 
+                       value="@entry.Score"
+                       data-entry-id="@entry.EntryId" />
+                <span class="score-value">@entry.Score</span>
+            </div>
+        </div>
+    }
+</div>

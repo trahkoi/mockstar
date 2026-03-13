@@ -3,17 +3,22 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Mockstar.ParserApi.Contracts;
+using Mockstar.Web.Services.Heats;
 using Mockstar.Web.Services.Imports;
 
 namespace Mockstar.Web.Pages.Import;
 
 public sealed class IndexModel : PageModel
 {
-    private readonly ParserApiClient _parserApiClient;
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public IndexModel(ParserApiClient parserApiClient)
+    private readonly ParserApiClient _parserApiClient;
+    private readonly HeatApiClient _heatApiClient;
+
+    public IndexModel(ParserApiClient parserApiClient, HeatApiClient heatApiClient)
     {
         _parserApiClient = parserApiClient;
+        _heatApiClient = heatApiClient;
     }
 
     public void OnGet()
@@ -40,6 +45,91 @@ public sealed class IndexModel : PageModel
 
         var result = await _parserApiClient.ParseTextAsync(extractedText, cancellationToken);
         return BuildReviewResult(result);
+    }
+
+    public async Task<IActionResult> OnPostActivateAsync(string activationPayload, string? roleAssignmentsJson, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(activationPayload))
+        {
+            TempData["Error"] = "Missing activation payload.";
+            return RedirectToPage();
+        }
+
+        ParserEventRecord eventRecord;
+        try
+        {
+            var json = Encoding.UTF8.GetString(Convert.FromBase64String(activationPayload));
+            eventRecord = JsonSerializer.Deserialize<ParserEventRecord>(json, JsonOptions)!;
+        }
+        catch
+        {
+            TempData["Error"] = "Invalid activation payload.";
+            return RedirectToPage();
+        }
+
+        if (!string.IsNullOrWhiteSpace(roleAssignmentsJson))
+        {
+            var assignments = JsonSerializer.Deserialize<Dictionary<string, Dictionary<int, string>>>(roleAssignmentsJson, JsonOptions);
+            if (assignments is not null)
+            {
+                eventRecord = ApplyRoleAssignments(eventRecord, assignments);
+            }
+        }
+
+        var saved = await _heatApiClient.SaveEventAsync(eventRecord.Id, eventRecord, cancellationToken);
+        if (!saved)
+        {
+            TempData["Error"] = "Could not save heats to the database. Is the parser API running?";
+            return RedirectToPage();
+        }
+
+        return RedirectToPage("/Heats/Index");
+    }
+
+    private static ParserEventRecord ApplyRoleAssignments(
+        ParserEventRecord eventRecord,
+        Dictionary<string, Dictionary<int, string>> assignments)
+    {
+        var updatedHeats = eventRecord.Heats.Select(heat =>
+        {
+            if (heat.AmbiguousEntries.Count == 0 || !assignments.TryGetValue(heat.Id, out var heatAssignments))
+            {
+                return heat;
+            }
+
+            var leaders = heat.LeaderEntries.ToList();
+            var followers = heat.FollowerEntries.ToList();
+
+            for (var i = 0; i < heat.AmbiguousEntries.Count; i++)
+            {
+                if (!heatAssignments.TryGetValue(i, out var role))
+                {
+                    continue;
+                }
+
+                var entry = heat.AmbiguousEntries[i];
+                if (string.Equals(role, "Leader", StringComparison.OrdinalIgnoreCase))
+                {
+                    leaders.Add(entry);
+                }
+                else if (string.Equals(role, "Follower", StringComparison.OrdinalIgnoreCase))
+                {
+                    followers.Add(entry);
+                }
+            }
+
+            leaders.Sort((a, b) => a.Bib.CompareTo(b.Bib));
+            followers.Sort((a, b) => a.Bib.CompareTo(b.Bib));
+
+            return heat with
+            {
+                LeaderEntries = leaders,
+                FollowerEntries = followers,
+                AmbiguousEntries = []
+            };
+        }).ToArray();
+
+        return eventRecord with { Heats = updatedHeats };
     }
 
     private PartialViewResult BuildReviewResult(ParserApiCallResult result)

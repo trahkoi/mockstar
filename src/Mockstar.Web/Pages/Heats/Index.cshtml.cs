@@ -1,68 +1,66 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Mockstar.Web.Models;
+using Mockstar.ParserApi.Contracts;
+using Mockstar.Web.Services.Heats;
 
 namespace Mockstar.Web.Pages.Heats;
 
 public sealed class IndexModel : PageModel
 {
-    private static readonly JsonSerializerOptions StateJsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly HeatApiClient _heatApiClient;
 
-    public void OnGet()
+    public IndexModel(HeatApiClient heatApiClient)
     {
+        _heatApiClient = heatApiClient;
     }
 
-    public IActionResult OnPostDetail(string heatId, string stateJson)
-    {
-        var state = DeserializeState(stateJson);
-        if (string.IsNullOrWhiteSpace(heatId) || state is null)
-        {
-            return Partial("_HeatDetailPartial", HeatDetailViewModel.WithMessage("Choose an imported heat to inspect."));
-        }
+    public HeatsViewModel ViewModel { get; private set; } = HeatsViewModel.Empty;
 
-        var heat = state?.EventRecords?.SelectMany(record => record.Heats).FirstOrDefault(item => item.Id == heatId);
+    public async Task OnGetAsync(CancellationToken cancellationToken)
+    {
+        ViewModel = await HeatsViewModel.LoadAsync(_heatApiClient, cancellationToken);
+    }
+
+    public async Task<IActionResult> OnGetDetailAsync(string heatId, CancellationToken cancellationToken)
+    {
+        var (heat, _) = await _heatApiClient.GetHeatByIdAsync(heatId, cancellationToken);
 
         return heat is null
-            ? Partial("_HeatDetailPartial", HeatDetailViewModel.WithMessage("The selected heat was not found in client state."))
+            ? Partial("_HeatDetailPartial", HeatDetailViewModel.WithMessage("Heat not found."))
             : Partial("_HeatDetailPartial", HeatDetailViewModel.From(heat));
-    }
-
-    public IActionResult OnPostList(string stateJson)
-    {
-        var state = DeserializeState(stateJson);
-        return Partial("_HeatListPartial", HeatListViewModel.From(state));
-    }
-
-    private static ClientJudgingState? DeserializeState(string? stateJson)
-    {
-        if (string.IsNullOrWhiteSpace(stateJson))
-        {
-            return null;
-        }
-
-        return JsonSerializer.Deserialize<ClientJudgingState>(stateJson, StateJsonOptions);
     }
 }
 
-public sealed record HeatListViewModel(
-    string? Message,
-    IReadOnlyList<HeatEventSectionViewModel> EventSections,
-    string? SelectedHeatId)
+public sealed record HeatsViewModel(
+    IReadOnlyList<HeatEventSectionViewModel> EventSections)
 {
-    public static HeatListViewModel From(ClientJudgingState? state)
+    public static readonly HeatsViewModel Empty = new([]);
+
+    public bool HasEvents => EventSections.Count > 0;
+
+    public static async Task<HeatsViewModel> LoadAsync(HeatApiClient client, CancellationToken cancellationToken)
     {
-        if (state is null || state.EventRecords.Count == 0)
+        var eventIds = await client.ListEventIdsAsync(cancellationToken);
+        if (eventIds.Count == 0)
         {
-            return new("Import a roster first to populate heat selection.", Array.Empty<HeatEventSectionViewModel>(), null);
+            return Empty;
         }
 
-        return new(
-            null,
-            state.EventRecords.Select(record => new HeatEventSectionViewModel(
-                record.Name,
-                record.Heats.Select(heat => new HeatListItemViewModel(heat.Id, heat.Name)).ToArray())).ToArray(),
-            state.SelectedHeatId);
+        var sections = new List<HeatEventSectionViewModel>();
+        foreach (var eventId in eventIds)
+        {
+            var eventRecord = await client.GetEventAsync(eventId, cancellationToken);
+            if (eventRecord is null)
+            {
+                continue;
+            }
+
+            sections.Add(new HeatEventSectionViewModel(
+                eventRecord.Name,
+                eventRecord.Heats.Select(h => new HeatListItemViewModel(h.Id, h.Name)).ToArray()));
+        }
+
+        return new HeatsViewModel(sections);
     }
 }
 
@@ -72,6 +70,7 @@ public sealed record HeatListItemViewModel(string Id, string Name);
 
 public sealed record HeatDetailViewModel(
     string? Message,
+    string? HeatId,
     string? Name,
     string? Type,
     IReadOnlyList<string> LeaderEntries,
@@ -79,14 +78,15 @@ public sealed record HeatDetailViewModel(
     IReadOnlyList<string> CoupleEntries)
 {
     public static HeatDetailViewModel WithMessage(string message) =>
-        new(message, null, null, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+        new(message, null, null, null, [], [], []);
 
-    public static HeatDetailViewModel From(ClientHeat heat) =>
+    public static HeatDetailViewModel From(ParserHeat heat) =>
         new(
             null,
+            heat.Id,
             heat.Name,
             heat.Type.Replace("-", " ", StringComparison.Ordinal),
-            heat.LeaderEntries.Select(entry => entry.Display).ToArray(),
-            heat.FollowerEntries.Select(entry => entry.Display).ToArray(),
-            heat.CoupleEntries.Select(entry => entry.Display).ToArray());
+            heat.LeaderEntries.Select(e => e.Display).ToArray(),
+            heat.FollowerEntries.Select(e => e.Display).ToArray(),
+            heat.CoupleEntries.Select(e => e.Display).ToArray());
 }

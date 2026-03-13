@@ -1,0 +1,48 @@
+@page "/Scoring/{heatId}"
+@model Mockstar.Web.Pages.Scoring.HeatModel
+@{
+    ViewData["Title"] = Model.ViewModel?.HeatName ?? "Scoring";
+}
+
+<section class="scoring-page">
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="error-message">
+            <p>@Model.ErrorMessage</p>
+            <a href="/Heats">Back to heats</a>
+        </div>
+    }
+    else if (Model.ViewModel is not null)
+    {
+        var vm = Model.ViewModel;
+        
+        <div class="scoring-header">
+            <div class="eyebrow">@vm.HeatType</div>
+            <h1>@vm.HeatName</h1>
+        </div>
+
+        @if (vm.ShowRoleSwitcher)
+        {
+            <nav class="role-tabs">
+                @foreach (var role in vm.Roles)
+                {
+                    <button type="button"
+                            class="role-tab @(role.IsActive ? "is-active" : "")"
+                            hx-get="/Scoring/@vm.HeatId?role=@role.Id&handler=Panel"
+                            hx-target="#scoring-panel"
+                            hx-swap="innerHTML">
+                        @role.Label
+                    </button>
+                }
+            </nav>
+        }
+
+        <div id="scoring-panel" data-role="@vm.ActiveRole" data-heat-id="@vm.HeatId">
+            @await Html.PartialAsync("_ScoringPanelPartial", vm)
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/scoring-minimal.js" asp-append-version="true"></script>
+}

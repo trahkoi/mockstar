@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Mockstar.ParserApi.Persistence.Entities;
+using Mockstar.Web.Persistence.Entities;
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Persistence.Mapping;
+namespace Mockstar.Web.Persistence.Mapping;
 
 public static class HeatMapper
 {

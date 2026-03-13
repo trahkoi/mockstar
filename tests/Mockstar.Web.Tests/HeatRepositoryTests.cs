@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Mockstar.ParserApi.Persistence;
+using Mockstar.Web.Persistence;
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Tests;
+namespace Mockstar.Web.Tests;
 
 public sealed class HeatRepositoryTests : IDisposable
 {

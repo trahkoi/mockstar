@@ -1,6 +1,6 @@
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Persistence;
+namespace Mockstar.Web.Persistence;
 
 public interface IHeatRepository
 {

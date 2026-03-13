@@ -1,7 +1,7 @@
 using Mockstar.ParserApi.Contracts;
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Persistence.Mapping;
+namespace Mockstar.Web.Persistence.Mapping;
 
 public static class ContractMapper
 {

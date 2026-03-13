@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Mockstar.ParserApi.Persistence.Entities;
+using Mockstar.Web.Persistence.Entities;
 
-namespace Mockstar.ParserApi.Persistence;
+namespace Mockstar.Web.Persistence;
 
 public class HeatDbContext : DbContext
 {

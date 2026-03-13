@@ -3,11 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Mockstar.ParserApi.Persistence;
+using Mockstar.Web.Persistence;
 
 #nullable disable
 
-namespace Mockstar.ParserApi.Persistence.Migrations
+namespace Mockstar.Web.Persistence.Migrations
 {
     [DbContext(typeof(HeatDbContext))]
     partial class HeatDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace Mockstar.ParserApi.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
-            modelBuilder.Entity("Mockstar.ParserApi.Persistence.Entities.EventEntity", b =>
+            modelBuilder.Entity("Mockstar.Web.Persistence.Entities.EventEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(256)
@@ -39,7 +39,7 @@ namespace Mockstar.ParserApi.Persistence.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("Mockstar.ParserApi.Persistence.Entities.HeatEntity", b =>
+            modelBuilder.Entity("Mockstar.Web.Persistence.Entities.HeatEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,9 +88,9 @@ namespace Mockstar.ParserApi.Persistence.Migrations
                     b.ToTable("Heats");
                 });
 
-            modelBuilder.Entity("Mockstar.ParserApi.Persistence.Entities.HeatEntity", b =>
+            modelBuilder.Entity("Mockstar.Web.Persistence.Entities.HeatEntity", b =>
                 {
-                    b.HasOne("Mockstar.ParserApi.Persistence.Entities.EventEntity", "Event")
+                    b.HasOne("Mockstar.Web.Persistence.Entities.EventEntity", "Event")
                         .WithMany("Heats")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -99,7 +99,7 @@ namespace Mockstar.ParserApi.Persistence.Migrations
                     b.Navigation("Event");
                 });
 
-            modelBuilder.Entity("Mockstar.ParserApi.Persistence.Entities.EventEntity", b =>
+            modelBuilder.Entity("Mockstar.Web.Persistence.Entities.EventEntity", b =>
                 {
                     b.Navigation("Heats");
                 });

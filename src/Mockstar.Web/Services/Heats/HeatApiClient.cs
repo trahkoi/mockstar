@@ -1,99 +1,57 @@
-using System.Text.Json;
 using Mockstar.ParserApi.Contracts;
+using Mockstar.Web.Persistence;
+using Mockstar.Web.Persistence.Mapping;
 
 namespace Mockstar.Web.Services.Heats;
 
 public sealed class HeatApiClient
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly IHeatRepository _repository;
 
-    private readonly HttpClient _httpClient;
-
-    public HeatApiClient(HttpClient httpClient)
+    public HeatApiClient(IHeatRepository repository)
     {
-        _httpClient = httpClient;
+        _repository = repository;
     }
 
     public async Task<(ParserHeat? Heat, string? EventId)> GetHeatByIdAsync(string heatId, CancellationToken cancellationToken = default)
     {
-        try
+        var eventIds = await _repository.ListEventIdsAsync(cancellationToken);
+
+        foreach (var eventId in eventIds)
         {
-            // Get all event IDs
-            var eventIds = await ListEventIdsAsync(cancellationToken);
-
-            // Search each event for the heat
-            foreach (var eventId in eventIds)
+            var eventRecord = await _repository.LoadAsync(eventId, cancellationToken);
+            if (eventRecord is null)
             {
-                var response = await _httpClient.GetFromJsonAsync<LoadHeatsResponse>(
-                    $"/api/heats/{Uri.EscapeDataString(eventId)}",
-                    JsonOptions,
-                    cancellationToken);
-
-                var heat = response?.EventRecord?.Heats.FirstOrDefault(h => h.Id == heatId);
-                if (heat is not null)
-                {
-                    return (heat, eventId);
-                }
+                continue;
             }
 
-            return (null, null);
+            var contract = ContractMapper.ToContract(eventRecord);
+            var heat = contract.Heats.FirstOrDefault(h => h.Id == heatId);
+            if (heat is not null)
+            {
+                return (heat, eventId);
+            }
         }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            return (null, null);
-        }
+
+        return (null, null);
     }
 
     public async Task<bool> SaveEventAsync(string eventId, ParserEventRecord eventRecord, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var request = new SaveHeatsRequest(eventRecord);
-            var response = await _httpClient.PostAsJsonAsync(
-                $"/api/heats/{Uri.EscapeDataString(eventId)}",
-                request,
-                JsonOptions,
-                cancellationToken);
-
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            return false;
-        }
+        var domainEvent = ContractMapper.ToDomain(eventRecord);
+        var eventToSave = domainEvent with { Id = eventId };
+        await _repository.SaveAsync(eventToSave, cancellationToken);
+        return true;
     }
 
     public async Task<ParserEventRecord?> GetEventAsync(string eventId, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var response = await _httpClient.GetFromJsonAsync<LoadHeatsResponse>(
-                $"/api/heats/{Uri.EscapeDataString(eventId)}",
-                JsonOptions,
-                cancellationToken);
-
-            return response?.EventRecord;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            return null;
-        }
+        var eventRecord = await _repository.LoadAsync(eventId, cancellationToken);
+        return eventRecord is not null ? ContractMapper.ToContract(eventRecord) : null;
     }
 
     public async Task<IReadOnlyList<string>> ListEventIdsAsync(CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var response = await _httpClient.GetFromJsonAsync<ListEventsResponse>(
-                "/api/heats",
-                JsonOptions,
-                cancellationToken);
-
-            return response?.EventIds ?? [];
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            return [];
-        }
+        return await _repository.ListEventIdsAsync(cancellationToken);
     }
 }

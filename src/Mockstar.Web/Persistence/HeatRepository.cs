@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Mockstar.ParserApi.Persistence.Entities;
-using Mockstar.ParserApi.Persistence.Mapping;
+using Mockstar.Web.Persistence.Entities;
+using Mockstar.Web.Persistence.Mapping;
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Persistence;
+namespace Mockstar.Web.Persistence;
 
 public class HeatRepository : IHeatRepository
 {

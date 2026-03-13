@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Mockstar.ParserApi.Contracts;
-using Mockstar.ParserApi.Persistence;
-using Mockstar.ParserApi.Persistence.Mapping;
 using Mockstar.ParserApi.Services.Rosters;
 using Mockstar.ParserApi.Services;
 
@@ -25,31 +22,11 @@ public sealed class Program
         builder.Services.AddScoped<WebScraper>();
         builder.Services.AddScoped<ParserImportService>();
 
-        // Persistence
-        var connectionString = builder.Configuration.GetConnectionString("HeatDb")
-            ?? "Data Source=mockstar.db";
-        builder.Services.AddDbContext<HeatDbContext>(options =>
-            options.UseSqlite(connectionString));
-        builder.Services.AddScoped<IHeatRepository, HeatRepository>();
-
         var app = builder.Build();
-
-        // Apply migrations on startup
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<HeatDbContext>();
-            dbContext.Database.Migrate();
-        }
 
         app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
         app.MapPost("/api/parser/text", ParseTextAsync);
         app.MapPost("/api/parser/url", ParseUrlAsync);
-
-        // Heat storage endpoints
-        app.MapPost("/api/heats/{eventId}", SaveHeatsAsync);
-        app.MapGet("/api/heats/{eventId}", LoadHeatsAsync);
-        app.MapDelete("/api/heats/{eventId}", DeleteHeatsAsync);
-        app.MapGet("/api/heats", ListEventsAsync);
 
         return app;
     }
@@ -118,45 +95,5 @@ public sealed class Program
         };
         problem.Extensions["errorCode"] = errorCode;
         return Results.Problem(problem);
-    }
-
-    private static async Task<IResult> SaveHeatsAsync(
-        string eventId,
-        SaveHeatsRequest request,
-        IHeatRepository repository,
-        CancellationToken cancellationToken)
-    {
-        var domainEvent = ContractMapper.ToDomain(request.EventRecord);
-        // Ensure the event ID from the route matches
-        var eventToSave = domainEvent with { Id = eventId };
-        await repository.SaveAsync(eventToSave, cancellationToken);
-        return Results.Ok();
-    }
-
-    private static async Task<IResult> LoadHeatsAsync(
-        string eventId,
-        IHeatRepository repository,
-        CancellationToken cancellationToken)
-    {
-        var eventRecord = await repository.LoadAsync(eventId, cancellationToken);
-        var contract = eventRecord is not null ? ContractMapper.ToContract(eventRecord) : null;
-        return Results.Ok(new LoadHeatsResponse(contract));
-    }
-
-    private static async Task<IResult> DeleteHeatsAsync(
-        string eventId,
-        IHeatRepository repository,
-        CancellationToken cancellationToken)
-    {
-        await repository.DeleteAsync(eventId, cancellationToken);
-        return Results.Ok();
-    }
-
-    private static async Task<IResult> ListEventsAsync(
-        IHeatRepository repository,
-        CancellationToken cancellationToken)
-    {
-        var eventIds = await repository.ListEventIdsAsync(cancellationToken);
-        return Results.Ok(new ListEventsResponse(eventIds));
     }
 }

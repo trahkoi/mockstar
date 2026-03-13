@@ -1,6 +1,6 @@
 using Mockstar.Scoring;
 
-namespace Mockstar.ParserApi.Persistence.Entities;
+namespace Mockstar.Web.Persistence.Entities;
 
 public class HeatEntity
 {

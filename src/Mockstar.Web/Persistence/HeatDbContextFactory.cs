@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Mockstar.ParserApi.Persistence;
+namespace Mockstar.Web.Persistence;
 
 public class HeatDbContextFactory : IDesignTimeDbContextFactory<HeatDbContext>
 {

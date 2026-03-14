@@ -36,6 +36,7 @@ resource parserApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
+      appCommandLine: 'dotnet /home/site/wwwroot/Mockstar.ParserApi.dll'
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
@@ -54,6 +55,7 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
+      appCommandLine: 'dotnet /home/site/wwwroot/Mockstar.Web.dll'
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'

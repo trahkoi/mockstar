@@ -12,12 +12,11 @@ param location string = resourceGroup().location
 param appServicePlanSku string = 'B1'
 
 @description('SQLite connection string for the heat database (e.g. Data Source=/home/data/mockstar.db).')
-@secure()
 param heatDbConnectionString string = 'Data Source=/home/data/mockstar.db'
 
 var planName = '${webAppName}-plan'
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: planName
   location: location
   sku: {
@@ -29,7 +28,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   }
 }
 
-resource parserApp 'Microsoft.Web/sites@2023-01-01' = {
+resource parserApp 'Microsoft.Web/sites@2024-04-01' = {
   name: parserAppName
   location: location
   properties: {
@@ -37,10 +36,18 @@ resource parserApp 'Microsoft.Web/sites@2023-01-01' = {
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
       appCommandLine: 'dotnet /home/site/wwwroot/Mockstar.ParserApi.dll'
+      minTlsVersion: '1.2'
+      healthCheckPath: '/health'
+      httpLoggingEnabled: true
+      detailedErrorLoggingEnabled: true
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
+        }
+        {
+          name: 'ASPNETCORE_ENVIRONMENT'
+          value: 'Production'
         }
       ]
     }
@@ -48,7 +55,7 @@ resource parserApp 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-resource webApp 'Microsoft.Web/sites@2023-01-01' = {
+resource webApp 'Microsoft.Web/sites@2024-04-01' = {
   name: webAppName
   location: location
   properties: {
@@ -56,6 +63,9 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
       appCommandLine: 'dotnet /home/site/wwwroot/Mockstar.Web.dll'
+      minTlsVersion: '1.2'
+      httpLoggingEnabled: true
+      detailedErrorLoggingEnabled: true
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
@@ -64,6 +74,10 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
         {
           name: 'ParserApi__BaseUrl'
           value: 'https://${parserApp.properties.defaultHostName}/'
+        }
+        {
+          name: 'ASPNETCORE_ENVIRONMENT'
+          value: 'Production'
         }
       ]
       connectionStrings: [
